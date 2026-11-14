@@ -2,10 +2,7 @@ import subprocess
 import sys
 import re
 from pathlib import Path
-
 from config import *
-# import oled_display
-
 
 def check_files():
 
@@ -52,16 +49,6 @@ def run_command_llm(command, timeout=300):
         errors="replace",
         timeout=timeout
     )
-
-    # result = subprocess.run(
-    #     command,
-    #     stdout=subprocess.PIPE,
-    #     stderr=subprocess.DEVNULL,
-    #     text=True,
-    #     encoding="utf-8",
-    #     errors="replace",
-    #     timeout=timeout
-    # )
 
     if result.returncode != 0:
         print("\nCommand failed:")
@@ -127,9 +114,7 @@ def speech_to_text(audio_file):
 
 
 def generate_response(user_text, history):
-
     print("\nThinking...")
-    # oled_display.send_text("Thinking...")
 
     system_prompt = """
     You are a helpful offline AI voice assistant.
@@ -166,8 +151,6 @@ def generate_response(user_text, history):
         f"<|im_start|>assistant\n"
     )
 
-    # print("\nConversation:\n", conversation)
-
     result = run_command_llm([
         str(LLAMA_BIN),
         "-m", str(LLM_MODEL),
@@ -178,21 +161,12 @@ def generate_response(user_text, history):
         "--no-display-prompt",
         "--simple-io",
         "--single-turn"
-        # "--log-disable"
     ], timeout=60)
 
     answer = result.stdout.strip()
 
     answer = re.split(r"<\|im_start\|>assistant\s*", answer)[-1]
     answer = re.split(r"<\|im_end\|>|\[ Prompt:", answer)[0].strip()
-
-    # answer = answer.replace("\ufffd", "")
-
-    # Remove end-of-turn markers if present
-    # answer = re.split(
-    #     r"<\|im_(?:end|start)\|>",
-    #     answer
-    # )[0].strip()
 
     if not answer:
         answer = "Sorry, I could not generate a response."
@@ -219,8 +193,6 @@ def text_to_speech(text):
 
     print("Speaking...")
 
-
-    #  pw-play audio/harvard.wav (this works on Raspberry Pi OS)
     subprocess.run(
         ["pw-play", str(output_file)],
         check=True
@@ -243,8 +215,6 @@ def main():
 
     history = []
 
-    # text_to_speech("Hi! I am your offline AI voice assistant. How can I help you today?")
-
     while True:
 
         try:
@@ -257,11 +227,9 @@ def main():
 
             audio_file = record_audio()
             user_text = speech_to_text(audio_file)
-            # oled_display.send_text(user_text)
 
             if not user_text:
                 print("No speech recognized.")
-                # oled_display.send_text("No speech recognized")
                 continue
 
             if user_text.lower().strip(
@@ -283,7 +251,6 @@ def main():
             history = []
             print(answer)
 
-            # oled_display.send_text(answer)
             text_to_speech(answer)
 
         except KeyboardInterrupt:
@@ -294,17 +261,8 @@ def main():
 
     print("\nChatbot stopped.")
 
-
-def test():
-    history = []
-    user_text = "Hello, what is your name?"
-
-    answer = generate_response(
-        user_text,
-        history
-    )
-    print("Test response:", answer)
-
 if __name__ == "__main__":
     main()
-    # test()
+
+
+
